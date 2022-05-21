@@ -41,8 +41,35 @@ async function mikrotik_server() {
         await client.connect();
         const productCollection = client.db('mikrotik').collection('products');
 
+        /**
+         * --------------------------------------------------------------------
+         * root route
+         * --------------------------------------------------------------------
+         */
         app.get('/', (req, res) => {
             res.send('Welcome to Mikrotik API');
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * Get all products
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/products', async (req, res) => {
+            const products = await productCollection.find({}).toArray();
+            res.send(products);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * get 3 products
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/home/products', async (req, res) => {
+            const products = await productCollection.find({}).limit(3).toArray();
+            res.send(products);
         })
 
 
