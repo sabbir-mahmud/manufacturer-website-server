@@ -1,0 +1,4 @@
+# git ignore file
+/node_modules
+/.env
+/fake.json
