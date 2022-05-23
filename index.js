@@ -135,6 +135,20 @@ async function mikrotik_server() {
             res.send(result);
         })
 
+        /**
+         * --------------------------------------------------------------------
+         * get orders by user
+         * --------------------------------------------------------------------
+         * 
+         */
+
+        app.get('/api/order', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const result = await orders.find({ user: email }).toArray();
+            res.send(result);
+        })
+
 
         /**
          * --------------------------------------------------------------------
@@ -143,8 +157,20 @@ async function mikrotik_server() {
          */
 
         app.get('/api/home/review', async (req, res) => {
-            const reviews = await reviewCollection.find({}).limit(3).toArray();
+            const reviews = await reviewCollection.find({}).sort({ _id: -1 }).limit(3).toArray();
             res.send(reviews);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * add a review
+         * --------------------------------------------------------------------
+         */
+
+        app.post('/api/review', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
         })
 
 
