@@ -41,9 +41,11 @@ async function mikrotik_server() {
          */
         await client.connect();
         const productCollection = client.db('mikrotik').collection('products');
+        const orders = client.db('mikrotik').collection('orders');
         const reviewCollection = client.db('mikrotik').collection('reviews');
         const users = client.db('mikrotik').collection('users');
-        const orders = client.db('mikrotik').collection('orders');
+        const admins = client.db('mikrotik').collection('admins');
+        const profile = client.db('mikrotik').collection('profile');
 
         /**
          * --------------------------------------------------------------------
@@ -56,20 +58,104 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * JWT token generator
+         * Register user one database and send JWT token generator
          * --------------------------------------------------------------------
          */
 
         app.put('/api/login', async (req, res) => {
             const email = req.body.email;
             const role = 'client';
-            const user = { email, role }
-            const result = await users.insertOne(user);
-            const accessToken = jwt.sign(user, process.env.JWT_SECRET, {
+            const filter = { email: email };
+            const user = { email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await users.updateOne(filter, updateDoc, options);
+            const accessToken = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '3d'
             });
             res.send({ result, accessToken });
+        })
 
+        /**
+         * --------------------------------------------------------------------
+         * Get all users from database for admin
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/users', async (req, res) => {
+            const result = await users.find().toArray();
+            res.send(result);
+
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * user profile update
+         * --------------------------------------------------------------------
+         */
+
+        app.put('/api/users/profile', async (req, res) => {
+            const data = req.body;
+            console.log(data);
+            const filter = { email: data.email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: data,
+            }
+            const result = await profile.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * get user profile
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/users/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await profile.findOne({ email });
+            if (result) {
+                res.send(result);
+            }
+            else {
+                res.send('User not found');
+            }
+
+
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * Make admin
+         * --------------------------------------------------------------------
+         */
+
+        app.put('/api/admin', async (req, res) => {
+            const email = req.body.email;
+            const role = 'admin';
+            const filter = { email: email };
+            const user = { email, role };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await admins.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * Get admin
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/admin', async (req, res) => {
+            const email = req.query.email
+            const result = await admins.findOne({ email });
+            res.send(result);
         })
 
         /**
@@ -127,9 +213,7 @@ async function mikrotik_server() {
         app.post('/api/order', async (req, res) => {
             const order = req.body;
             const product = await productCollection.findOne({ _id: ObjectId(order?.product) })
-            console.log(product);
             let qtn = parseInt(product?.Quantity) - parseInt(order?.quantity);
-            console.log(qtn);
             await productCollection.updateOne({ _id: ObjectId(order?.product) }, { $set: { Quantity: JSON.stringify(qtn) } });
             const result = await orders.insertOne(order);
             res.send(result);
@@ -144,7 +228,6 @@ async function mikrotik_server() {
 
         app.get('/api/order', async (req, res) => {
             const email = req.query.email;
-            console.log(email);
             const result = await orders.find({ user: email }).toArray();
             res.send(result);
         })
