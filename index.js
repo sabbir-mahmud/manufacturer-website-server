@@ -259,9 +259,6 @@ async function mikrotik_server() {
         app.patch('/api/order/:id', async (req, res) => {
             const id = req.params.id;
             const payment = req.body;
-            console.log(payment);
-            console.log(id);
-
             const filter = { _id: ObjectId(id) };
             const updatedDoc = {
                 $set: {
@@ -318,9 +315,6 @@ async function mikrotik_server() {
         app.patch('/api/orders/shipped/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body;
-            console.log(status);
-            console.log(id);
-
             const filter = { _id: ObjectId(id) };
             const updatedDoc = {
                 $set: {
@@ -328,7 +322,6 @@ async function mikrotik_server() {
                 }
             }
             const updatedBooking = await orders.updateOne(filter, updatedDoc);
-            console.log(updatedBooking);
             res.send(updatedBooking);
         })
 
