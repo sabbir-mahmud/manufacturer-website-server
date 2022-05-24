@@ -89,19 +89,28 @@ async function mikrotik_server() {
 
         app.post('/create-payment-intent', async (req, res) => {
             const price = req.body.pay;
-            const amount = price * 100;
-            if (amount) {
-                const paymentIntent = await stripe.paymentIntents.create({
-                    amount: amount,
-                    currency: "usd",
-                    automatic_payment_methods: {
-                        enabled: true,
-                    },
-                });
-                res.send({ clientSecret: paymentIntent.client_secret })
+            if (price < 999999) {
+                const amount = price * 100;
+                if (amount) {
+                    const paymentIntent = await stripe.paymentIntents.create({
+                        amount: amount,
+                        currency: 'usd',
+                        payment_method_types: ['card']
+                    });
+                    if (paymentIntent.client_secret) {
+                        return res.send({ clientSecret: paymentIntent.client_secret });
+                    } else {
+                        return res.send({ clientSecret: '' })
+                    }
+
+                } else {
+                    return res.send({ clientSecret: '' })
+                }
+
             } else {
-                res.send({ clientSecret: '' })
+                return res.send({ clientSecret: '' })
             }
+
         });
 
         /**
@@ -239,12 +248,19 @@ async function mikrotik_server() {
             const order = req.body;
             const product = await productCollection.findOne({ _id: ObjectId(order?.product) })
             if (product) {
-                let qtn = parseInt(product?.Quantity) - parseInt(order?.quantity);
-                await productCollection.updateOne({ _id: ObjectId(order?.product) }, { $set: { Quantity: qtn } });
+                let qtn = parseInt(product?.quantity) - parseInt(order?.quantity);
                 const pay = parseFloat(product?.price) * parseInt(order?.quantity);
-                order.pay = pay;
-                const result = await orders.insertOne(order);
-                return res.send(result);
+                if (pay < 999999) {
+                    order.pay = pay;
+                    await productCollection.updateOne({ _id: ObjectId(order?.product) }, { $set: { quantity: qtn } });
+
+                    const result = await orders.insertOne(order);
+                    return res.send(result);
+                }
+                else {
+                    return res.send({ message: `you can't order more than $999,999.99` });
+                }
+
             }
             res.send({ message: 'Product not found' });
 
@@ -327,11 +343,23 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * Delete order
+         * Delete order admin
          * --------------------------------------------------------------------
          */
 
         app.delete('/api/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await orders.deleteOne({ _id: ObjectId(id) });
+            res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * Delete order user
+         * --------------------------------------------------------------------
+         */
+
+        app.delete('/api/user/orders/:id', async (req, res) => {
             const id = req.params.id;
             const result = await orders.deleteOne({ _id: ObjectId(id) });
             res.send(result);
