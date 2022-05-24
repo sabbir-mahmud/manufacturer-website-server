@@ -120,8 +120,17 @@ async function mikrotik_server() {
          */
 
         app.get('/api/users', async (req, res) => {
-            const result = await users.find().toArray();
-            res.send(result);
+            const adminCollection = await admins.find().toArray()
+            const usersCollection = await users.find().toArray();
+            usersCollection.forEach(user => {
+                const admin = adminCollection.find(admin => admin.email === user.email);
+                if (admin) {
+                    user.isAdmin = true;
+                } else {
+                    user.isAdmin = false;
+                }
+            })
+            res.send(usersCollection);
 
         })
 
