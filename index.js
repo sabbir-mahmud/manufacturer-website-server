@@ -10,6 +10,9 @@ const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
+const stripe = require('stripe')(process.env.PAYMENTS_SECRET_KEY);
+
+
 const port = process.env.PORT || 5000;
 
 /**
@@ -80,6 +83,29 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
+         * Payments
+         * --------------------------------------------------------------------
+         */
+
+        app.post('/create-payment-intent', async (req, res) => {
+            const price = req.body.pay;
+            const amount = price * 100;
+            if (amount) {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amount,
+                    currency: "usd",
+                    automatic_payment_methods: {
+                        enabled: true,
+                    },
+                });
+                res.send({ clientSecret: paymentIntent.client_secret })
+            } else {
+                res.send({ clientSecret: '' })
+            }
+        });
+
+        /**
+         * --------------------------------------------------------------------
          * Get all users from database for admin
          * --------------------------------------------------------------------
          */
@@ -98,7 +124,6 @@ async function mikrotik_server() {
 
         app.put('/api/users/profile', async (req, res) => {
             const data = req.body;
-            console.log(data);
             const filter = { email: data.email };
             const options = { upsert: true };
             const updateDoc = {
@@ -213,10 +238,39 @@ async function mikrotik_server() {
         app.post('/api/order', async (req, res) => {
             const order = req.body;
             const product = await productCollection.findOne({ _id: ObjectId(order?.product) })
-            let qtn = parseInt(product?.Quantity) - parseInt(order?.quantity);
-            await productCollection.updateOne({ _id: ObjectId(order?.product) }, { $set: { Quantity: JSON.stringify(qtn) } });
-            const result = await orders.insertOne(order);
-            res.send(result);
+            if (product) {
+                let qtn = parseInt(product?.Quantity) - parseInt(order?.quantity);
+                await productCollection.updateOne({ _id: ObjectId(order?.product) }, { $set: { Quantity: qtn } });
+                const pay = parseFloat(product?.price) * parseInt(order?.quantity);
+                order.pay = pay;
+                const result = await orders.insertOne(order);
+                return res.send(result);
+            }
+            res.send({ message: 'Product not found' });
+
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * update payments details
+         * --------------------------------------------------------------------
+         */
+
+        app.patch('/api/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            console.log(payment);
+            console.log(id);
+
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedBooking = await orders.updateOne(filter, updatedDoc);
+            res.send(updatedBooking);
         })
 
         /**
@@ -232,6 +286,63 @@ async function mikrotik_server() {
             res.send(result);
         })
 
+        /**
+         * --------------------------------------------------------------------
+         * get order for payment
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await orders.findOne({ _id: ObjectId(id) });
+            res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * Get all orders for admin
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/orders', async (req, res) => {
+            const result = await orders.find({}).toArray();
+            res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * shipped order
+         * --------------------------------------------------------------------
+         */
+
+        app.patch('/api/orders/shipped/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body;
+            console.log(status);
+            console.log(id);
+
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: status.status
+                }
+            }
+            const updatedBooking = await orders.updateOne(filter, updatedDoc);
+            console.log(updatedBooking);
+            res.send(updatedBooking);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * Delete order
+         * --------------------------------------------------------------------
+         */
+
+        app.delete('/api/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await orders.deleteOne({ _id: ObjectId(id) });
+            res.send(result);
+        })
 
         /**
          * --------------------------------------------------------------------
