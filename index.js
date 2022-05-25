@@ -37,7 +37,6 @@ function verifyUser(req, res, next) {
         const token = auth.split(' ')[1];
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
             if (err) {
-                console.log(err);
                 return res.status(403).send({ message: 'Forbidden access' });
             }
             else {
@@ -73,6 +72,7 @@ async function mikrotik_server() {
         const users = client.db('mikrotik').collection('users');
         const admins = client.db('mikrotik').collection('admins');
         const profile = client.db('mikrotik').collection('profile');
+        const projects = client.db('mikrotik').collection('projects');
 
         /**
          * ---------------------------------------------------------------
@@ -82,7 +82,6 @@ async function mikrotik_server() {
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
-            console.log(requester);
             const adminsCollection = await admins.findOne({ email: requester });
             if (adminsCollection?.role === 'admin') {
                 next();
@@ -472,6 +471,16 @@ async function mikrotik_server() {
             res.send(result);
         })
 
+        /**
+         * --------------------------------------------------------------------
+         * Get projects details for portfolio
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/portfolio', async (req, res) => {
+            const result = await projects.find({}).toArray();
+            res.send(result);
+        })
 
 
     } finally {
