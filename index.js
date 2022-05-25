@@ -279,13 +279,47 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * add product
+         * add product route for admin
          * --------------------------------------------------------------------
          */
 
         app.post('/api/products', verifyUser, verifyAdmin, async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * update product route for admin
+         * --------------------------------------------------------------------
+         */
+
+        app.patch('/api/products/:id', verifyUser, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const product = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: product,
+            };
+            const productData = await productCollection.findOne(filter);
+            if (productData) {
+                const result = await productCollection.updateOne(filter, updateDoc, options);
+                return res.send(result);
+            }
+
+            return res.send({ message: 'Product not found' });
+        })
+        /**
+         * --------------------------------------------------------------------
+         * delete product admin route
+         * --------------------------------------------------------------------
+         */
+
+        app.delete('/api/products/:id', verifyUser, verifyAdmin, async (req, res) => {
+            const product = req.params.id;
+            const result = await productCollection.deleteOne({ _id: ObjectId(product) });
             res.send(result);
         })
 
