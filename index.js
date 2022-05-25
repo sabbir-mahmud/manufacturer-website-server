@@ -23,6 +23,30 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
+/**
+ * ------------------------------------------------------------------------
+ * check user access token
+ * ------------------------------------------------------------------------
+ */
+
+function verifyUser(req, res, next) {
+    const auth = req.headers.authorization;
+    if (!auth) {
+        return res.status(401).send({ message: 'unauthorized access' });
+    } else {
+        const token = auth.split(' ')[1];
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+            if (err) {
+                console.log(err);
+                return res.status(403).send({ message: 'Forbidden access' });
+            }
+            else {
+                req.decoded = decoded;
+                next();
+            }
+        });
+    };
+};
 
 
 /**
@@ -51,6 +75,24 @@ async function mikrotik_server() {
         const profile = client.db('mikrotik').collection('profile');
 
         /**
+         * ---------------------------------------------------------------
+         * Verify admin
+         * ---------------------------------------------------------------
+         */
+
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            console.log(requester);
+            const adminsCollection = await admins.findOne({ email: requester });
+            if (adminsCollection?.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ message: 'forbidden' });
+            }
+        }
+
+        /**
          * --------------------------------------------------------------------
          * root route
          * --------------------------------------------------------------------
@@ -67,7 +109,6 @@ async function mikrotik_server() {
 
         app.put('/api/login', async (req, res) => {
             const email = req.body.email;
-            const role = 'client';
             const filter = { email: email };
             const user = { email };
             const options = { upsert: true };
@@ -87,7 +128,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.post('/create-payment-intent', async (req, res) => {
+        app.post('/create-payment-intent', verifyUser, async (req, res) => {
             const price = req.body.pay;
             if (price < 999999) {
                 const amount = price * 100;
@@ -119,7 +160,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.get('/api/users', async (req, res) => {
+        app.get('/api/users', verifyUser, verifyAdmin, async (req, res) => {
             const adminCollection = await admins.find().toArray()
             const usersCollection = await users.find().toArray();
             usersCollection.forEach(user => {
@@ -140,7 +181,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.put('/api/users/profile', async (req, res) => {
+        app.put('/api/users/profile', verifyUser, async (req, res) => {
             const data = req.body;
             const filter = { email: data.email };
             const options = { upsert: true };
@@ -157,7 +198,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.get('/api/users/profile/:email', async (req, res) => {
+        app.get('/api/users/profile/:email', verifyUser, async (req, res) => {
             const email = req.params.email;
             const result = await profile.findOne({ email });
             if (result) {
@@ -176,7 +217,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.put('/api/admin', async (req, res) => {
+        app.put('/api/admin', verifyUser, verifyAdmin, async (req, res) => {
             const email = req.body.email;
             const role = 'admin';
             const filter = { email: email };
@@ -195,7 +236,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.get('/api/admin', async (req, res) => {
+        app.get('/api/admin', verifyUser, verifyAdmin, async (req, res) => {
             const email = req.query.email
             const result = await admins.findOne({ email });
             res.send(result);
@@ -203,7 +244,7 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * Get all products
+         * Get all products public route
          * --------------------------------------------------------------------
          */
 
@@ -214,7 +255,7 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * get 3 products
+         * get 3 products public route
          * --------------------------------------------------------------------
          */
 
@@ -225,7 +266,7 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * get product by id
+         * get product by id public route
          * --------------------------------------------------------------------
          */
 
@@ -242,7 +283,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.post('/api/products', async (req, res) => {
+        app.post('/api/products', verifyUser, verifyAdmin, async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result);
@@ -253,7 +294,7 @@ async function mikrotik_server() {
          * Order product
          * --------------------------------------------------------------------
          */
-        app.post('/api/order', async (req, res) => {
+        app.post('/api/order', verifyUser, async (req, res) => {
             const order = req.body;
             const product = await productCollection.findOne({ _id: ObjectId(order?.product) })
             if (product) {
@@ -281,7 +322,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.patch('/api/order/:id', async (req, res) => {
+        app.patch('/api/order/:id', verifyUser, async (req, res) => {
             const id = req.params.id;
             const payment = req.body;
             const filter = { _id: ObjectId(id) };
@@ -302,7 +343,7 @@ async function mikrotik_server() {
          * 
          */
 
-        app.get('/api/order', async (req, res) => {
+        app.get('/api/order', verifyUser, async (req, res) => {
             const email = req.query.email;
             const result = await orders.find({ user: email }).toArray();
             res.send(result);
@@ -314,7 +355,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.get('/api/order/:id', async (req, res) => {
+        app.get('/api/order/:id', verifyUser, async (req, res) => {
             const id = req.params.id;
             const result = await orders.findOne({ _id: ObjectId(id) });
             res.send(result);
@@ -326,18 +367,18 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.get('/api/orders', async (req, res) => {
+        app.get('/api/orders', verifyUser, verifyAdmin, async (req, res) => {
             const result = await orders.find({}).toArray();
             res.send(result);
         })
 
         /**
          * --------------------------------------------------------------------
-         * shipped order
+         * shipped order admin route
          * --------------------------------------------------------------------
          */
 
-        app.patch('/api/orders/shipped/:id', async (req, res) => {
+        app.patch('/api/orders/shipped/:id', verifyUser, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const status = req.body;
             const filter = { _id: ObjectId(id) };
@@ -352,11 +393,11 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * Delete order admin
+         * Delete order admin route
          * --------------------------------------------------------------------
          */
 
-        app.delete('/api/orders/:id', async (req, res) => {
+        app.delete('/api/orders/:id', verifyUser, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const result = await orders.deleteOne({ _id: ObjectId(id) });
             res.send(result);
@@ -364,11 +405,11 @@ async function mikrotik_server() {
 
         /**
          * --------------------------------------------------------------------
-         * Delete order user
+         * Delete order user route
          * --------------------------------------------------------------------
          */
 
-        app.delete('/api/user/orders/:id', async (req, res) => {
+        app.delete('/api/user/orders/:id', verifyUser, async (req, res) => {
             const id = req.params.id;
             const result = await orders.deleteOne({ _id: ObjectId(id) });
             res.send(result);
@@ -391,7 +432,7 @@ async function mikrotik_server() {
          * --------------------------------------------------------------------
          */
 
-        app.post('/api/review', async (req, res) => {
+        app.post('/api/review', verifyUser, async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
