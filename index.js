@@ -28,23 +28,6 @@ app.use(cors());
  * ------------------------------------------------------------------------
  */
 
-function verifyUser(req, res, next) {
-  const auth = req.headers.authorization;
-  if (!auth) {
-    return res.status(401).send({ message: "unauthorized access" });
-  } else {
-    const token = auth.split(" ")[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-      if (err) {
-        return res.status(403).send({ message: "Forbidden access" });
-      } else {
-        req.decoded = decoded;
-        next();
-      }
-    });
-  }
-}
-
 /**
  * ------------------------------------------------------------------------
  * MongoDB Config
@@ -79,16 +62,6 @@ async function mikrotik_server() {
      * Verify admin
      * ---------------------------------------------------------------
      */
-
-    const verifyAdmin = async (req, res, next) => {
-      const requester = req.decoded.email;
-      const adminsCollection = await admins.findOne({ email: requester });
-      if (adminsCollection?.role === "admin") {
-        next();
-      } else {
-        res.status(403).send({ message: "forbidden" });
-      }
-    };
 
     /**
      * --------------------------------------------------------------------
