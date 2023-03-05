@@ -78,25 +78,6 @@ async function mikrotik_server() {
      * --------------------------------------------------------------------
      */
 
-    app.put("/api/login", async (req, res) => {
-      const email = req.body.email;
-      const filter = { email: email };
-      const user = { email };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: user,
-      };
-      const result = await users.updateOne(filter, updateDoc, options);
-      const accessToken = jwt.sign(
-        { email: email },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: "3d",
-        }
-      );
-      res.send({ result, accessToken });
-    });
-
     /**
      * --------------------------------------------------------------------
      * Payments
