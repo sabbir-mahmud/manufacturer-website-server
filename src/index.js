@@ -14,6 +14,7 @@ const app = express();
 // middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static("uploads"));
 
 // connect to Database
 connectDB();

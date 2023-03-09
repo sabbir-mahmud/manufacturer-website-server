@@ -5,7 +5,7 @@ import productModel from "../models/productModels.js";
 const createProduct = async (req, res) => {
   try {
     const product = new productModel({
-      img: req.file.path,
+      img: req.file.filename,
       name: req.body.name,
       quantity: req.body.quantity,
       price: req.body.price,
