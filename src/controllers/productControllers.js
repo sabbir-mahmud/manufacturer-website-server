@@ -14,7 +14,7 @@ const createProduct = async (req, res) => {
     });
     await product.validate();
     await product.save();
-    return res.status(201).send(user);
+    return res.status(201).send(product);
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
