@@ -1,11 +1,14 @@
 // imports
 import express from "express";
-import { createProduct } from "../controllers/productControllers.js";
-import { upload } from "../middlewares/fileUploadingMiddleware.js";
+import {
+  createProduct,
+  updateProduct,
+} from "../controllers/productControllers.js";
 
 // router
 const router = express.Router();
 
-router.post("/", upload.single("img"), createProduct);
+router.post("/", createProduct);
+router.put("/:id", updateProduct);
 
 export default router;
