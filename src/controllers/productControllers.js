@@ -12,6 +12,17 @@ const getProducts = async (req, res) => {
   }
 };
 
+// get product
+const getProduct = async (req, res) => {
+  try {
+    const product = await productModel.findById(req.params.id);
+    return res.status(200).send(product);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
+
 // create new product
 const createProduct = async (req, res) => {
   try {
@@ -74,4 +85,10 @@ const deleteProducts = async (req, res) => {
   }
 };
 
-export { createProduct, deleteProducts, getProducts, updateProduct };
+export {
+  createProduct,
+  deleteProducts,
+  getProducts,
+  getProduct,
+  updateProduct,
+};

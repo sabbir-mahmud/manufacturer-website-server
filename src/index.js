@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./configs/connectDB.js";
+import orderRouter from "./routes/orderRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 
@@ -28,6 +29,7 @@ app.get("/", async (req, res) => {
 // users auth routes
 app.use("/api/users/", userRouter);
 app.use("/api/products/", productRouter);
+app.use("/api/order/", orderRouter);
 
 // listening server to port
 const port = 5000 || process.env.PORT;
