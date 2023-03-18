@@ -2,8 +2,30 @@
 import Stripe from "stripe";
 import orderModel from "../models/orderModels.js";
 const stripe = new Stripe(
-  "pk_test_51L0hxlEZlpATTp01pmVfH39AEz88vRS3gtaq24IKt7ycF15zlpMhZYIslPdUBDv76JJI2LOqh2gs9c5vARhhNRSu00W1WaO6Vd"
+  "sk_test_51L0hxlEZlpATTp015WVNZvrzVgm1NSJpOgyGwploURgse2aEcf3PpIS1gCuu7gbWG0xf6QTXKAUsSVNxZUCSQAgG00H5nfUUcD"
 );
+
+// get all orders
+const getOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.find({ user: req.query.email });
+    return res.status(200).send(orders);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
+
+// get order
+const getOrder = async (req, res) => {
+  try {
+    const orders = await orderModel.findById(req.params.id);
+    return res.status(200).send(orders);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
 
 // create order
 const createOrder = async (req, res) => {
@@ -71,4 +93,4 @@ const updateOrder = async (req, res) => {
   }
 };
 
-export { createOrder, createPayment, updateOrder };
+export { createOrder, createPayment, getOrder, getOrders, updateOrder };
