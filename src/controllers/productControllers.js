@@ -48,11 +48,13 @@ const updateProduct = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.id);
     const { filename, name, quantity, price, min_order, max_order } = req.body;
-    if (!filename || !name || !quantity || !price || !min_order || !max_order) {
-      return res
-        .status(400)
-        .send("Non fields error!, please send a valid data");
-    }
+    const img = req.file.image;
+    console.log(img);
+    // if (!filename || !name || !quantity || !price || !min_order || !max_order) {
+    //   return res
+    //     .status(400)
+    //     .send("Non fields error!, please send a valid data");
+    // }
     if (product) {
       product.img = filename;
       product.name = name;

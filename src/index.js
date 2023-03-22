@@ -33,7 +33,7 @@ app.use("/api/products/", productRouter);
 app.use("/api/order/", orderRouter);
 
 // images route
-app.get("/images/:imageName", getImage);
+app.get("/products/:imageName", getImage);
 
 // listening server to port
 const port = 5000 || process.env.PORT;
