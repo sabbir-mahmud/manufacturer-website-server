@@ -28,10 +28,21 @@ const login_controller = async (req, res) => {
         expiresIn: "3d",
       }
     );
-    return res.status(400).json({ data, accessToken });
+    return res.status(200).json({ data, accessToken });
   } catch (error) {
     console.log(error);
   }
 };
 
-export { login_controller };
+const userDetails = async (req, res) => {
+  try {
+    const user = await userModel.find({ email: req.query.email });
+    return res.status(200).json({
+      message: user[0] ? user[0].is_admin : false,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export { login_controller, userDetails };
