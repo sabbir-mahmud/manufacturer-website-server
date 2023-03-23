@@ -27,12 +27,16 @@ const getProduct = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const product = new productModel({
-      img: req.body.filename,
+      img: `http://localhost:5000/products/${req.file.filename}`,
+      brand: req.body.brand,
       name: req.body.name,
-      quantity: req.body.quantity,
+      model: req.body.model,
       price: req.body.price,
+      weight: req.body.weight,
+      quantity: req.body.quantity,
       min_order: req.body.min_order,
       max_order: req.body.max_order,
+      description: req.body.description,
     });
     await product.validate();
     await product.save();
