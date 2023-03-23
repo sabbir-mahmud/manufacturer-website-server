@@ -2,11 +2,13 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import morgan from "morgan";
 import path, { join } from "path";
 import connectDB from "./configs/connectDB.js";
 import { productImage } from "./controllers/imgControllers.js";
 import orderRouter from "./routes/orderRoutes.js";
 import productRouter from "./routes/productRoutes.js";
+import reviewRouter from "./routes/reviewRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -20,6 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(join(__dirname, "public")));
 app.use(express.static("uploads"));
+app.use(morgan("dev"));
 
 // connect to Database
 connectDB();
@@ -34,6 +37,7 @@ app.get("/", async (req, res) => {
 app.use("/api/users/", userRouter);
 app.use("/api/products/", productRouter);
 app.use("/api/order/", orderRouter);
+app.use("/api/reviews", reviewRouter);
 
 // images route
 app.get("/images/products/:imageName", productImage);
