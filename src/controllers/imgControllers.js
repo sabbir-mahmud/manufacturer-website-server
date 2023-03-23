@@ -11,7 +11,6 @@ const productImage = (req, res) => {
     "products",
     imageName
   );
-  console.log(imagePath);
   res.sendFile(imagePath);
 };
 
