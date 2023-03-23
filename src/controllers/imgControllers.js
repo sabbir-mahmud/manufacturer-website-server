@@ -5,7 +5,6 @@ const productImage = (req, res) => {
   const imageName = req.params.imageName;
   const imagePath = path.join(
     __dirname,
-    "..",
     "uploads",
     "images",
     "products",
