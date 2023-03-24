@@ -13,6 +13,17 @@ const productImagesStorage = multer.diskStorage({
   },
 });
 
+const userImagesStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    fs.mkdir("./uploads/images/profiles", (err) => {
+      cb(null, "./uploads/images/profiles");
+    });
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname);
+  },
+});
+
 const uploadProductImage = multer({
   storage: productImagesStorage,
   limits: {
@@ -20,4 +31,11 @@ const uploadProductImage = multer({
   },
 });
 
-export { uploadProductImage };
+const uploadUserImage = multer({
+  storage: userImagesStorage,
+  limits: {
+    fileSize: 1024 * 1024 * 50,
+  },
+});
+
+export { uploadProductImage, uploadUserImage };

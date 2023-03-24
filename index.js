@@ -201,68 +201,6 @@ async function mikrotik_server() {
 
     /**
      * --------------------------------------------------------------------
-     * Get admin
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/admin", verifyUser, verifyAdmin, async (req, res) => {
-      const email = req.query.email;
-      const result = await admins.findOne({ email });
-      res.send(result);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * Get all products public route
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/products", async (req, res) => {
-      const products = await productCollection.find({}).toArray();
-      res.send(products);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * get 3 products public route
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/home/products", async (req, res) => {
-      const products = await productCollection
-        .find({})
-        .sort({ _id: -1 })
-        .limit(3)
-        .toArray();
-      res.send(products);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * get product by id public route
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const product = await productCollection.findOne({ _id: ObjectId(id) });
-      res.send(product);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * add product route for admin
-     * --------------------------------------------------------------------
-     */
-
-    app.post("/api/products", verifyUser, verifyAdmin, async (req, res) => {
-      const product = req.body;
-      const result = await productCollection.insertOne(product);
-      res.send(result);
-    });
-
-    /**
-     * --------------------------------------------------------------------
      * update product route for admin
      * --------------------------------------------------------------------
      */
@@ -310,80 +248,6 @@ async function mikrotik_server() {
         res.send(result);
       }
     );
-
-    /**
-     * --------------------------------------------------------------------
-     * Order product
-     * --------------------------------------------------------------------
-     */
-    app.post("/api/order", verifyUser, async (req, res) => {
-      const order = req.body;
-      const product = await productCollection.findOne({
-        _id: ObjectId(order?.product),
-      });
-      if (product) {
-        let qtn = parseInt(product?.quantity) - parseInt(order?.quantity);
-        const pay = parseFloat(product?.price) * parseInt(order?.quantity);
-        if (pay < 999999) {
-          order.pay = pay;
-          await productCollection.updateOne(
-            { _id: ObjectId(order?.product) },
-            { $set: { quantity: qtn } }
-          );
-
-          const result = await orders.insertOne(order);
-          return res.send(result);
-        } else {
-          return res.send({ message: `you can't order more than $999,999.99` });
-        }
-      }
-      res.send({ message: "Product not found" });
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * update payments details
-     * --------------------------------------------------------------------
-     */
-
-    app.patch("/api/order/:id", verifyUser, async (req, res) => {
-      const id = req.params.id;
-      const payment = req.body;
-      const filter = { _id: ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          paid: true,
-          transactionId: payment.transactionId,
-        },
-      };
-      const updatedBooking = await orders.updateOne(filter, updatedDoc);
-      res.send(updatedBooking);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * get orders by user
-     * --------------------------------------------------------------------
-     *
-     */
-
-    app.get("/api/order", verifyUser, async (req, res) => {
-      const email = req.query.email;
-      const result = await orders.find({ user: email }).toArray();
-      res.send(result);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * get order for payment
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/order/:id", verifyUser, async (req, res) => {
-      const id = req.params.id;
-      const result = await orders.findOne({ _id: ObjectId(id) });
-      res.send(result);
-    });
 
     /**
      * --------------------------------------------------------------------
@@ -441,44 +305,6 @@ async function mikrotik_server() {
     app.delete("/api/user/orders/:id", verifyUser, async (req, res) => {
       const id = req.params.id;
       const result = await orders.deleteOne({ _id: ObjectId(id) });
-      res.send(result);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * get reviews for homepage
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/home/review", async (req, res) => {
-      const reviews = await reviewCollection
-        .find({})
-        .sort({ _id: -1 })
-        .limit(3)
-        .toArray();
-      res.send(reviews);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * add a review
-     * --------------------------------------------------------------------
-     */
-
-    app.post("/api/review", verifyUser, async (req, res) => {
-      const review = req.body;
-      const result = await reviewCollection.insertOne(review);
-      res.send(result);
-    });
-
-    /**
-     * --------------------------------------------------------------------
-     * Get projects details for portfolio
-     * --------------------------------------------------------------------
-     */
-
-    app.get("/api/portfolio", async (req, res) => {
-      const result = await projects.find({}).toArray();
       res.send(result);
     });
   } finally {

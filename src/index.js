@@ -1,9 +1,11 @@
 // imports
+import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
 import path, { join } from "path";
+
 import connectDB from "./configs/connectDB.js";
 import { productImage } from "./controllers/imgControllers.js";
 import orderRouter from "./routes/orderRoutes.js";
@@ -23,6 +25,7 @@ app.use(express.json());
 app.use(express.static(join(__dirname, "public")));
 app.use(express.static("uploads"));
 app.use(morgan("dev"));
+app.use(bodyParser.json({ limit: "50mb" }));
 
 // connect to Database
 connectDB();
