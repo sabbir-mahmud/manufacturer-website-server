@@ -11,9 +11,9 @@ const getProfile = async (req, res) => {
   }
 };
 
+// create new profile
 const createProfile = async (req, res) => {
   try {
-    console.log(req.body);
     const filter = { user: req.body.user };
     const options = { upsert: true };
     const updateDoc = {

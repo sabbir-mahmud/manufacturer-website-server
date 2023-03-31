@@ -8,6 +8,7 @@ import path, { join } from "path";
 
 import connectDB from "./configs/connectDB.js";
 import { productImage } from "./controllers/imgControllers.js";
+import contactRouter from "./routes/contactRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
@@ -41,6 +42,7 @@ app.use("/api/users/", userRouter);
 app.use("/api/products/", productRouter);
 app.use("/api/order/", orderRouter);
 app.use("/api/reviews", reviewRouter);
+app.use("/api/contact", contactRouter);
 
 // images route
 app.get("/images/products/:imageName", productImage);
