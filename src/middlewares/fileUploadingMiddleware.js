@@ -2,6 +2,7 @@
 import fs from "fs";
 import multer from "multer";
 
+// product images storage
 const productImagesStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     fs.mkdir("./uploads/images/products", (err) => {
@@ -13,6 +14,7 @@ const productImagesStorage = multer.diskStorage({
   },
 });
 
+// user profiles storage
 const userImagesStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     fs.mkdir("./uploads/images/profiles", (err) => {
@@ -24,6 +26,7 @@ const userImagesStorage = multer.diskStorage({
   },
 });
 
+// handle product images
 const uploadProductImage = multer({
   storage: productImagesStorage,
   limits: {
@@ -31,6 +34,7 @@ const uploadProductImage = multer({
   },
 });
 
+// handle user images
 const uploadUserImage = multer({
   storage: userImagesStorage,
   limits: {
