@@ -2,6 +2,42 @@
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModels.js";
 
+// get all user: admin route
+const getUsers = async (req, res) => {
+  try {
+    const users = await userModel.find();
+    return res.status(200).send(users);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// make someone admin: admin route
+const makeAdmin = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.params.id);
+    if (user) {
+      user.is_admin = true;
+      await user.save();
+      return res.status(200).send(user);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// delete user
+const deleteUser = async (req, res) => {
+  try {
+    const result = await userModel.findByIdAndDelete(req.params.id);
+    console.log(result);
+    return res.status(200).send(result);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// login
 const login_controller = async (req, res) => {
   try {
     const email = req.body.email;
@@ -34,6 +70,7 @@ const login_controller = async (req, res) => {
   }
 };
 
+// user details route
 const userDetails = async (req, res) => {
   try {
     const user = await userModel.find({ email: req.query.email });
@@ -45,4 +82,4 @@ const userDetails = async (req, res) => {
   }
 };
 
-export { login_controller, userDetails };
+export { deleteUser, getUsers, login_controller, makeAdmin, userDetails };
