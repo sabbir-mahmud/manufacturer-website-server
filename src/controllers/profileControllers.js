@@ -5,6 +5,7 @@ import profileModel from "../models/profileModels.js";
 const getProfile = async (req, res) => {
   try {
     const profile = await profileModel.find({ user: req.params.user });
+    console.log(profile);
     return res.status(200).send(profile);
   } catch (error) {
     console.log(error);
@@ -20,7 +21,7 @@ const createProfile = async (req, res) => {
       $set: {
         user: req.body.user,
         name: req.body.name,
-        avatar: `${req.file.filename}`,
+        avatar: `http://localhost:5000/images/profiles/${req.file.filename}`,
         bio: req.body.bio,
         address: req.body.address,
         phone: req.body.phone,

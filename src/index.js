@@ -7,7 +7,7 @@ import morgan from "morgan";
 import path, { join } from "path";
 
 import connectDB from "./configs/connectDB.js";
-import { productImage } from "./controllers/imgControllers.js";
+import { productImage, userProfile } from "./controllers/imgControllers.js";
 import contactRouter from "./routes/contactRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import productRouter from "./routes/productRoutes.js";
@@ -46,6 +46,7 @@ app.use("/api/contact", contactRouter);
 
 // images route
 app.get("/images/products/:imageName", productImage);
+app.get("/images/profiles/:imageName", userProfile);
 
 // listening server to port
 const port = 5000 || process.env.PORT;

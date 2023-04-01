@@ -11,6 +11,7 @@ import {
   makeAdmin,
   userDetails,
 } from "../controllers/userControllers.js";
+import { uploadUserImage } from "../middlewares/fileUploadingMiddleware.js";
 
 // Router
 const router = express.Router();
@@ -20,7 +21,7 @@ router.get("/make-admin/:id", makeAdmin);
 router.get("/all-users", getUsers);
 router.get("/:user", getProfile);
 router.delete("/user/:id", deleteUser);
-router.put("/profile", createProfile);
+router.put("/profile", uploadUserImage.single("avatar"), createProfile);
 router.put("/login", login_controller);
 
 export default router;
