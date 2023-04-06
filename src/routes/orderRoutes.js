@@ -7,6 +7,7 @@ import {
   getAdminOrders,
   getOrder,
   getOrders,
+  shippedOrder,
   updateOrder,
 } from "../controllers/orderController.js";
 
@@ -20,6 +21,7 @@ router.get("/:id", getOrder);
 router.post("/", createOrder);
 router.post("/payment", createPayment);
 router.patch("/:id", updateOrder);
+router.patch("/shipped/:id", shippedOrder);
 router.delete("/:id", deleteOrder);
 
 export default router;

@@ -17,7 +17,7 @@ import { uploadUserImage } from "../middlewares/fileUploadingMiddleware.js";
 const router = express.Router();
 
 router.get("/admin", userDetails);
-router.get("/make-admin/:id", makeAdmin);
+router.get("/make-admin/:email", makeAdmin);
 router.get("/all-users", getUsers);
 router.get("/:user", getProfile);
 router.delete("/user/:id", deleteUser);

@@ -51,23 +51,29 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.id);
-    const { filename, name, quantity, price, min_order, max_order } = req.body;
-    const img = req.file.image;
-    console.log(img);
-    // if (!filename || !name || !quantity || !price || !min_order || !max_order) {
-    //   return res
-    //     .status(400)
-    //     .send("Non fields error!, please send a valid data");
-    // }
+    const {
+      brand,
+      name,
+      model,
+      quantity,
+      price,
+      weight,
+      min_order,
+      max_order,
+      description,
+    } = req.body;
     if (product) {
-      product.img = filename;
+      product.img = `http://localhost:5000/images/products/${req.file.filename}`;
+      product.brand = brand;
       product.name = name;
+      product.model = model;
       product.quantity = quantity;
       product.price = price;
+      product.weight = weight;
       product.min_order = min_order;
       product.max_order = max_order;
+      product.description = description;
       await product.save();
-      console.log(product);
 
       return res.status(200).json(product);
     } else {

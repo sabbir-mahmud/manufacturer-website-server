@@ -15,10 +15,10 @@ const getUsers = async (req, res) => {
 // make someone admin: admin route
 const makeAdmin = async (req, res) => {
   try {
-    const user = await userModel.findById(req.params.id);
+    const user = await userModel.find({ email: req.params.email });
     if (user) {
-      user.is_admin = true;
-      await user.save();
+      user[0].is_admin = true;
+      await user[0].save();
       return res.status(200).send(user);
     }
   } catch (error) {

@@ -114,6 +114,21 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+// shipped order: admin route
+const shippedOrder = async (req, res) => {
+  try {
+    const result = await orderModel.findById(req.params.id);
+    if (!result) {
+      return res.status(400).send({ message: "Order not found!" });
+    }
+    result.isDelivered = true;
+    await result.save();
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+};
+
 export {
   createOrder,
   createPayment,
@@ -121,5 +136,6 @@ export {
   getAdminOrders,
   getOrder,
   getOrders,
+  shippedOrder,
   updateOrder,
 };
