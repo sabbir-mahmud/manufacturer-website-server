@@ -16,6 +16,17 @@ const getOrders = async (req, res) => {
   }
 };
 
+// get all orders: admin
+const getAdminOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.find();
+    return res.status(200).send(orders);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error);
+  }
+};
+
 // get order
 const getOrder = async (req, res) => {
   try {
@@ -93,4 +104,22 @@ const updateOrder = async (req, res) => {
   }
 };
 
-export { createOrder, createPayment, getOrder, getOrders, updateOrder };
+// delete orders
+const deleteOrder = async (req, res) => {
+  try {
+    const result = await orderModel.findOneAndDelete(req.params.id);
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+};
+
+export {
+  createOrder,
+  createPayment,
+  deleteOrder,
+  getAdminOrders,
+  getOrder,
+  getOrders,
+  updateOrder,
+};
