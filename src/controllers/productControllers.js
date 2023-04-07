@@ -27,7 +27,7 @@ const getProduct = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const product = new productModel({
-      img: `http://localhost:5000/images/products/${req.file.filename}`,
+      img: `https://manufacturer-server.sabbirmahmud.com/images/products/${req.file.filename}`,
       brand: req.body.brand,
       name: req.body.name,
       model: req.body.model,
@@ -63,7 +63,7 @@ const updateProduct = async (req, res) => {
       description,
     } = req.body;
     if (product) {
-      product.img = `http://localhost:5000/images/products/${req.file.filename}`;
+      product.img = `https://manufacturer-server.sabbirmahmud.com/images/products/${req.file.filename}`;
       product.brand = brand;
       product.name = name;
       product.model = model;

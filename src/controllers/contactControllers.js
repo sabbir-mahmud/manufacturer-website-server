@@ -4,7 +4,6 @@ import contactModel from "../models/contactModels.js";
 // create contact
 const createContact = async (req, res) => {
   try {
-    console.log(req.body);
     const contact = new contactModel({
       email: req.body.email,
       phone: req.body.phone,

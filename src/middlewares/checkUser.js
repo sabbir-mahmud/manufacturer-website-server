@@ -1,3 +1,6 @@
+// import
+import jwt from "jsonwebtoken";
+
 // checking user authenticate
 
 const verifyUser = async (req, res, next) => {

@@ -11,17 +11,24 @@ import {
   makeAdmin,
   userDetails,
 } from "../controllers/userControllers.js";
+import verifyAdmin from "../middlewares/checkAdmin.js";
+import verifyUser from "../middlewares/checkUser.js";
 import { uploadUserImage } from "../middlewares/fileUploadingMiddleware.js";
 
 // Router
 const router = express.Router();
 
-router.get("/admin", userDetails);
-router.get("/make-admin/:email", makeAdmin);
-router.get("/all-users", getUsers);
-router.get("/:user", getProfile);
-router.delete("/user/:id", deleteUser);
-router.put("/profile", uploadUserImage.single("avatar"), createProfile);
+router.get("/admin", verifyUser, verifyAdmin, userDetails);
+router.get("/make-admin/:email", verifyUser, verifyAdmin, makeAdmin);
+router.get("/all-users", verifyUser, verifyAdmin, getUsers);
+router.get("/:user", verifyUser, getProfile);
+router.delete("/user/:id", verifyUser, verifyAdmin, deleteUser);
+router.put(
+  "/profile",
+  verifyUser,
+  uploadUserImage.single("avatar"),
+  createProfile
+);
 router.put("/login", login_controller);
 
 export default router;

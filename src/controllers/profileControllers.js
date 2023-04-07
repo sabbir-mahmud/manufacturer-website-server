@@ -21,7 +21,7 @@ const createProfile = async (req, res) => {
       $set: {
         user: req.body.user,
         name: req.body.name,
-        avatar: `http://localhost:5000/images/profiles/${req.file.filename}`,
+        avatar: `https://manufacturer-server.sabbirmahmud.com/images/profiles/${req.file.filename}`,
         bio: req.body.bio,
         address: req.body.address,
         phone: req.body.phone,

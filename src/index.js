@@ -15,6 +15,7 @@ import reviewRouter from "./routes/reviewRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
+// url.parse(process.argv[1]).pathname.slice(1)
 dotenv.config();
 
 // express app

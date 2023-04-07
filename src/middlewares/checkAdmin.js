@@ -1,8 +1,10 @@
+import userModel from "../models/userModels.js";
+
 // checking user permission admin routes
 const verifyAdmin = async (req, res, next) => {
   const requester = req.decoded.email;
-  const adminsCollection = await admins.findOne({ email: requester });
-  if (adminsCollection?.role === "admin") {
+  const user = await userModel.findOne({ email: requester });
+  if (user.is_admin) {
     next();
   } else {
     res.status(403).send({ message: "forbidden" });
