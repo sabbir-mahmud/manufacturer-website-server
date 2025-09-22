@@ -4,9 +4,6 @@
   "description": "",
   "main": "index.js",
   "type": "module",
-  "engines": {
-    "node": "18.18.2"
-  },
   "scripts": {
     "start": "node src/index.js",
     "start-dev": "nodemon src/index.js",
