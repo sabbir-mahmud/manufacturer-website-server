@@ -35,7 +35,7 @@ connectDB();
 // routes
 // root route
 app.get("/", async (req, res) => {
-  res.send("server running");
+    res.send("server running");
 });
 
 // users auth routes
@@ -50,7 +50,7 @@ app.get("/images/products/:imageName", productImage);
 app.get("/images/profiles/:imageName", userProfile);
 
 // listening server to port
-const port = 5000 || process.env.PORT;
+const port = 6000 || process.env.PORT;
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
