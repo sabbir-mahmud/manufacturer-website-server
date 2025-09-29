@@ -1,5 +1,6 @@
 // imports
 import jwt from "jsonwebtoken";
+import profileModel from "../models/profileModels.js";
 import userModel from "../models/userModels.js";
 
 // get all user: admin route
@@ -57,6 +58,13 @@ const login_controller = async (req, res) => {
         if (!data) {
             data = await userModel.findOneAndUpdate(filter, updateDoc, options);
         }
+
+        // create profile for new user
+        const profile = await profileModel.findOneAndUpdate(
+            { user: email },
+            { $setOnInsert: { user: email } },
+            { upsert: true }
+        );
 
         const accessToken = jwt.sign(
             { email: email },
